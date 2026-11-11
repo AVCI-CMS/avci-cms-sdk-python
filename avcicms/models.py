@@ -336,3 +336,181 @@ class MenuCategory(BaseModel):
 
 Menu.model_rebuild()
 MenuItem.model_rebuild()
+
+
+class AttributeEntityType(str, Enum):
+    PRODUCT = 'product'
+    PROJECT = 'project'
+    EVENT = 'event'
+    MERCHANT = 'merchant'
+    BRAND = 'brand'
+    ORGANIZATION = 'organization'
+    PLACE = 'place'
+
+
+class AttributeDataType(str, Enum):
+    STRING = 'STRING'
+    NUMBER = 'NUMBER'
+    BOOLEAN = 'BOOLEAN'
+    DATE = 'DATE'
+    SELECT = 'SELECT'
+    MULTISELECT = 'MULTISELECT'
+    SOURCE = 'SOURCE'
+    OBJECT = 'OBJECT'
+
+
+class AttributeOption(BaseModel):
+    label: str
+    value: str
+    color: str | None = None
+    isDefault: bool | None = False
+
+
+class AttributeValidation(BaseModel):
+    min: float | None = None
+    max: float | None = None
+    regex: str | None = None
+    options: list[AttributeOption] | None = None
+
+
+class AttributeSourceConfig(BaseModel):
+    entityType: str
+    filterQuery: dict[str, Any] | None = None
+
+
+class AttributeModel(BaseModel):
+    field_id: str | None = Field(None, alias='_id')
+    type: AttributeDataType
+    key: str
+    label: str
+    description: str | None = None
+    entityType: AttributeEntityType | str | None = None
+    isRequired: bool | None = False
+    isFilterable: bool | None = False
+    options: list[AttributeOption] | None = None
+    sourceConfig: AttributeSourceConfig | None = None
+    nestedFields: list[AttributeModel] | None = None
+    unit: str | None = None
+    status: str = 'ACTIVE'
+    createdAt: AwareDatetime | None = None
+    updatedAt: AwareDatetime | None = None
+
+
+class AttributeShortModel(BaseModel):
+    field_id: str | None = Field(None, alias='_id')
+    label: str
+    key: str
+    type: AttributeDataType
+
+
+class NormalizedAttributeValue(BaseModel):
+    attributeId: str
+    label: str | None = None
+    key: str | None = None
+    value: Any = None
+    unit: str | None = None
+
+
+class FormPurpose(str, Enum):
+    STANDARD = 'STANDARD'
+    MERCHANT_APPLICATION = 'MERCHANT_APPLICATION'
+    BRAND_APPLICATION = 'BRAND_APPLICATION'
+    ORGANIZATION_APPLICATION = 'ORGANIZATION_APPLICATION'
+    SURVEY = 'SURVEY'
+
+
+class FormSubmissionStatus(str, Enum):
+    PENDING = 'PENDING'
+    UNDER_REVIEW = 'UNDER_REVIEW'
+    APPROVED = 'APPROVED'
+    REJECTED = 'REJECTED'
+    CANCELLED = 'CANCELLED'
+
+
+class FormFieldType(str, Enum):
+    TEXT = 'TEXT'
+    NUMBER = 'NUMBER'
+    TEXTAREA = 'TEXTAREA'
+    SELECT = 'SELECT'
+    RADIO = 'RADIO'
+    CHECKBOX = 'CHECKBOX'
+    DATE = 'DATE'
+    FILE = 'FILE'
+    EMAIL = 'EMAIL'
+    PHONE = 'PHONE'
+    URL = 'URL'
+    SECTION = 'SECTION'
+    OBJECT = 'OBJECT'
+
+
+class FormFieldValidation(BaseModel):
+    min: float | None = None
+    max: float | None = None
+    regex: str | None = None
+    maxSize: int | None = None
+    accept: str | None = None
+
+
+class CustomFormField(BaseModel):
+    id: str
+    name: str
+    label: str
+    type: FormFieldType | str
+    required: bool | None = False
+    placeholder: str | None = None
+    options: list[str] | None = None
+    validation: FormFieldValidation | None = None
+    mappedAttributeId: str | None = None
+    nestedFields: list[CustomFormField] | None = None
+
+
+class CustomFormActions(BaseModel):
+    autoApprove: bool | None = False
+    notifyEmails: list[str] | None = None
+    createEntityOnApproval: bool | None = False
+    onApproval: dict[str, Any] | None = None
+
+
+class CustomFormModel(BaseModel):
+    field_id: str | None = Field(None, alias='_id')
+    title: str
+    slug: str | None = None
+    description: str | None = None
+    purpose: FormPurpose = FormPurpose.STANDARD
+    fields: list[CustomFormField] = []
+    actions: CustomFormActions | None = None
+    isActive: bool = True
+    createdAt: AwareDatetime | None = None
+    updatedAt: AwareDatetime | None = None
+
+
+class FormSubmissionModel(BaseModel):
+    field_id: str | None = Field(None, alias='_id')
+    form: str | CustomFormModel
+    user: str | None = None
+    status: FormSubmissionStatus = FormSubmissionStatus.PENDING
+    answers: dict[str, Any] | list[dict[str, Any]] = {}
+    submittedAt: AwareDatetime | None = None
+    processedAt: AwareDatetime | None = None
+    processedBy: str | None = None
+
+
+class FormStatisticsModel(BaseModel):
+    totalSubmissions: int = 0
+    pendingCount: int = 0
+    approvedCount: int = 0
+    rejectedCount: int = 0
+    conversionRate: float | None = None
+
+
+class SubmissionLogModel(BaseModel):
+    field_id: str | None = Field(None, alias='_id')
+    submissionId: str
+    action: str
+    details: Any | None = None
+    performedBy: str | None = None
+    createdAt: AwareDatetime | None = None
+
+
+AttributeModel.model_rebuild()
+CustomFormField.model_rebuild()

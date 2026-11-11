@@ -4,6 +4,8 @@ from typing import Optional
 from .exceptions import handle_response_error
 from .modules.content import ContentModule, AsyncContentModule
 from .modules.workspace import WorkspaceModule, AsyncWorkspaceModule
+from .modules.attribute import AttributeModule, AsyncAttributeModule
+from .modules.custom_form import CustomFormModule, AsyncCustomFormModule
 
 def response_hook(response: httpx.Response):
     handle_response_error(response)
@@ -27,6 +29,8 @@ class AvciCMS:
         
         self.content = ContentModule(self._client)
         self.workspace = WorkspaceModule(self._client)
+        self.attribute = AttributeModule(self._client)
+        self.custom_form = CustomFormModule(self._client)
 
 class AsyncAvciCMS:
     def __init__(self, api_key: str, project_id: str, base_url: Optional[str] = None):
@@ -47,3 +51,5 @@ class AsyncAvciCMS:
         
         self.content = AsyncContentModule(self._client)
         self.workspace = AsyncWorkspaceModule(self._client)
+        self.attribute = AsyncAttributeModule(self._client)
+        self.custom_form = AsyncCustomFormModule(self._client)
