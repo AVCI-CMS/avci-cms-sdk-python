@@ -14,6 +14,7 @@ from .modules.brand import BrandModule, AsyncBrandModule
 from .modules.organization import OrganizationModule, AsyncOrganizationModule
 from .modules.static import StaticModule, AsyncStaticModule
 from .modules.team import TeamModule, AsyncTeamModule
+from .modules.place import PlaceModule, AsyncPlaceModule
 
 def response_hook(response: httpx.Response):
     handle_response_error(response)
@@ -48,6 +49,7 @@ class AvciCMS:
         self.organization = OrganizationModule(self)
         self.static = StaticModule(self)
         self.team = TeamModule(self)
+        self.place = PlaceModule(self)
 
 class AsyncAvciCMS:
     def __init__(self, api_key: str, project_id: str, base_url: Optional[str] = None):
@@ -79,3 +81,4 @@ class AsyncAvciCMS:
         self.organization = AsyncOrganizationModule(self)
         self.static = AsyncStaticModule(self)
         self.team = AsyncTeamModule(self)
+        self.place = AsyncPlaceModule(self)

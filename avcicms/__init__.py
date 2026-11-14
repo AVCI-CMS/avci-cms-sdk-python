@@ -48,6 +48,14 @@ from .models import (
     TaxOfficeModel,
     TeamMemberName,
     TeamMemberModel,
+    PlaceLocationModel,
+    PlaceAddressModel,
+    PlaceCapacityModel,
+    PlaceDailyHours,
+    PlaceWorkingHoursModel,
+    PlacePricingModel,
+    PlaceModel,
+    PlaceShortModel,
 )
 
 __all__ = [
@@ -104,4 +112,12 @@ __all__ = [
     "TaxOfficeModel",
     "TeamMemberName",
     "TeamMemberModel",
+    "PlaceLocationModel",
+    "PlaceAddressModel",
+    "PlaceCapacityModel",
+    "PlaceDailyHours",
+    "PlaceWorkingHoursModel",
+    "PlacePricingModel",
+    "PlaceModel",
+    "PlaceShortModel",
 ]

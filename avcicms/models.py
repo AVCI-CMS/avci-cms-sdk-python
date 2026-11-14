@@ -875,5 +875,88 @@ class TeamMemberModel(BaseModel):
     status: str | None = None
 
 
+# =====================================================================
+# Place (Venue & Physical Location) Models
+# =====================================================================
+
+class PlaceLocationModel(BaseModel):
+    type: str | None = 'Point'
+    coordinates: list[float] | None = None
+
+
+class PlaceAddressModel(BaseModel):
+    title: str | None = None
+    country: str | None = None
+    city: str | None = None
+    district: str | None = None
+    neighborhood: str | None = None
+    street: str | None = None
+    buildingNumber: str | None = None
+    doorNumber: str | None = None
+    postalCode: str | None = None
+    formattedAddress: str | None = None
+    location: PlaceLocationModel | None = None
+    latitude: float | None = None
+    longitude: float | None = None
+
+
+class PlaceCapacityModel(BaseModel):
+    min: int | None = None
+    max: int | None = None
+
+
+class PlaceDailyHours(BaseModel):
+    start: str
+    end: str
+
+
+class PlaceWorkingHoursModel(BaseModel):
+    day: int
+    hours: PlaceDailyHours
+
+
+class PlacePricingModel(BaseModel):
+    isPaid: bool = False
+    pricingType: str | None = None
+    amount: float | None = None
+    currency: str | None = None
+
+
+class PlaceModel(BaseModel):
+    field_id: str | None = Field(None, alias='_id')
+    name: str
+    slug: str
+    abstract: str | None = None
+    description: str | None = None
+    logo: Any | None = None
+    coverImage: Any | None = None
+    featuredImage: Any | None = None
+    gallery: list[Any] = []
+    capacity: PlaceCapacityModel | None = None
+    working: list[PlaceWorkingHoursModel] = []
+    pricing: PlacePricingModel | None = None
+    address: PlaceAddressModel | None = None
+    area: list[Any] = []
+    color: str | None = None
+    status: str | None = None
+    attributes: list[dict[str, Any]] = []
+    createdAt: str | None = None
+    updatedAt: str | None = None
+
+
+class PlaceShortModel(BaseModel):
+    field_id: str | None = Field(None, alias='_id')
+    name: str
+    slug: str
+    abstract: str | None = None
+    logo: Any | None = None
+    featuredImage: Any | None = None
+    capacity: PlaceCapacityModel | None = None
+    address: PlaceAddressModel | None = None
+    pricing: PlacePricingModel | None = None
+    color: str | None = None
+
+
+
 AttributeModel.model_rebuild()
 CustomFormField.model_rebuild()
