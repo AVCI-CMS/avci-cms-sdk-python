@@ -512,5 +512,232 @@ class SubmissionLogModel(BaseModel):
     createdAt: AwareDatetime | None = None
 
 
+# ==========================================
+# Basket Models
+# ==========================================
+
+class BasketItemType(str, Enum):
+    PRODUCT = 'product'
+    EVENT = 'event'
+    ROUTE = 'route'
+
+
+class BasketItemPrice(BaseModel):
+    amount: float
+    currency: str = 'TRY'
+    original: float | None = None
+    discount: float | None = None
+
+
+class BasketItemModel(BaseModel):
+    field_id: str | None = Field(None, alias='_id')
+    id: str | None = None
+    itemType: BasketItemType = BasketItemType.PRODUCT
+    name: str | None = None
+    slug: str | None = None
+    quantity: int = 1
+    price: BasketItemPrice | None = None
+    image: str | None = None
+    variantId: str | None = None
+    variantName: str | None = None
+    merchant: dict[str, Any] | None = None
+    brand: dict[str, Any] | None = None
+    addedToBasketAt: AwareDatetime | None = None
+
+
+class BasketPricingModel(BaseModel):
+    subtotal: float = 0.0
+    discount: float = 0.0
+    shipping: float = 0.0
+    total: float = 0.0
+    currency: str = 'TRY'
+
+
+class BasketModel(BaseModel):
+    field_id: str | None = Field(None, alias='_id')
+    basketId: str | None = None
+    user: str | None = None
+    items: list[BasketItemModel] = []
+    price: BasketPricingModel | None = None
+    coupon: str | None = None
+    shippingAddressId: str | None = None
+    billingAddressId: str | None = None
+    updatedAt: AwareDatetime | None = None
+    createdAt: AwareDatetime | None = None
+
+
+class CreateBasketRequest(BaseModel):
+    currency: str = 'TRY'
+
+
+class AddBasketItemInput(BaseModel):
+    id: str
+    quantity: int = 1
+    itemType: BasketItemType = BasketItemType.PRODUCT
+    variantId: str | None = None
+
+
+class AddBasketItemsRequest(BaseModel):
+    items: list[AddBasketItemInput]
+
+
+class UpdateBasketRequest(BaseModel):
+    coupon: str | None = None
+    shippingAddressId: str | None = None
+    billingAddressId: str | None = None
+
+
+# ==========================================
+# Order Models
+# ==========================================
+
+class OrderStatus(str, Enum):
+    WAITING = 'WAITING'
+    PENDING_PAYMENT = 'PENDING_PAYMENT'
+    PREPARING = 'PREPARING'
+    ON_SHIPMENT = 'ON_SHIPMENT'
+    DONE = 'DONE'
+    REFUNDED = 'REFUNDED'
+    CANCELED = 'CANCELED'
+
+
+class OrderItemPriceModel(BaseModel):
+    sale: float
+    list: float | None = None
+    currency: str = 'TRY'
+
+
+class OrderItemModel(BaseModel):
+    field_id: str | None = Field(None, alias='_id')
+    name: str | None = None
+    image: str | None = None
+    quantity: int = 1
+    unit: str | None = None
+    price: OrderItemPriceModel | None = None
+    type: str | None = None
+    product: str | None = None
+    event: str | None = None
+    route: str | None = None
+    merchant: dict[str, Any] | None = None
+    brand: dict[str, Any] | None = None
+
+
+class OrderAddressModel(BaseModel):
+    title: str | None = None
+    address: str | None = None
+    city: str | None = None
+    state: str | None = None
+    country: str | None = None
+    zipCode: str | None = None
+    phone: str | None = None
+
+
+class OrderAttendeeModel(BaseModel):
+    basketItemId: str | None = None
+    name: dict[str, str] | None = None
+    email: str | None = None
+    phone: str | None = None
+    identityNumber: str | None = None
+    ticketNumber: str | None = None
+    qrHash: str | None = None
+
+
+class OrderPaymentModel(BaseModel):
+    currency: str = 'TRY'
+    paidAmount: float = 0.0
+    paymentStatus: str | None = None
+    paymentMethod: str | None = None
+    installment: int | None = None
+
+
+class OrderShipmentModel(BaseModel):
+    provider: str | None = None
+    trackingNumber: str | None = None
+    barcode: str | None = None
+    fee: dict[str, Any] | None = None
+
+
+class SubOrderModel(BaseModel):
+    field_id: str | None = Field(None, alias='_id')
+    subOrderId: str | None = None
+    status: OrderStatus = OrderStatus.WAITING
+    items: list[OrderItemModel] = []
+    payment: OrderPaymentModel | None = None
+    shipment: OrderShipmentModel | None = None
+    merchant: dict[str, Any] | None = None
+    brand: dict[str, Any] | None = None
+    createdAt: AwareDatetime | None = None
+    updatedAt: AwareDatetime | None = None
+
+
+class OrderModel(BaseModel):
+    field_id: str | None = Field(None, alias='_id')
+    orderId: str | None = None
+    date: AwareDatetime | str | None = None
+    status: OrderStatus = OrderStatus.WAITING
+    items: list[OrderItemModel] = []
+    subOrders: list[SubOrderModel] | None = None
+    addresses: dict[str, OrderAddressModel] | None = None
+    payment: OrderPaymentModel | None = None
+    attendees: list[OrderAttendeeModel] | None = None
+    subscriptionId: str | None = None
+    createdAt: AwareDatetime | None = None
+    updatedAt: AwareDatetime | None = None
+
+
+class OrderParticipantInput(BaseModel):
+    basketItemId: str
+    name: str
+    email: str | None = None
+    phone: str | None = None
+
+
+class CreateOrderRequest(BaseModel):
+    basketId: str
+    paymentMethod: str = 'CREDIT_CARD'
+    addresses: dict[str, str]
+    card: dict[str, Any] | None = None
+    cardId: str | None = None
+    installment: int | None = None
+    participants: list[OrderParticipantInput] | None = None
+
+
+class InstallmentQueryRequest(BaseModel):
+    binNumber: str
+    price: float
+
+
+class InstallmentPriceOption(BaseModel):
+    installmentNumber: int
+    totalPrice: float
+    installmentPrice: float
+
+
+class InstallmentOptionModel(BaseModel):
+    bankName: str
+    cardType: str
+    installmentPrices: list[InstallmentPriceOption] = []
+
+
+class SavedCardModel(BaseModel):
+    field_id: str | None = Field(None, alias='_id')
+    cardUserKey: str | None = None
+    cardToken: str | None = None
+    cardAlias: str | None = None
+    binNumber: str | None = None
+    cardType: str | None = None
+    cardAssociation: str | None = None
+    cardFamily: str | None = None
+    cardBankName: str | None = None
+
+
+class SaveCardRequest(BaseModel):
+    cardAlias: str
+    cardHolderName: str
+    cardNumber: str
+    expireMonth: str
+    expireYear: str
+
+
 AttributeModel.model_rebuild()
 CustomFormField.model_rebuild()
