@@ -739,5 +739,141 @@ class SaveCardRequest(BaseModel):
     expireYear: str
 
 
+# =====================================================================
+# User & Address Models
+# =====================================================================
+
+class UserAddressModel(BaseModel):
+    addressId: str | None = None
+    field_id: str | None = Field(None, alias='_id')
+    id: str | None = None
+    title: str
+    receiver: str
+    phone: str
+    city: str
+    district: str
+    neighborhood: str | None = None
+    address: str
+    zipCode: str | None = None
+    isPrimary: bool = False
+    type: str = 'individual'
+    taxOffice: str | None = None
+    taxNumber: str | None = None
+    companyName: str | None = None
+
+
+class CreateAddressRequest(BaseModel):
+    title: str
+    receiver: str
+    phone: str
+    city: str
+    district: str
+    neighborhood: str | None = None
+    address: str
+    zipCode: str | None = None
+    isPrimary: bool | None = None
+    type: str = 'individual'
+    taxOffice: str | None = None
+    taxNumber: str | None = None
+    companyName: str | None = None
+
+
+class UpdateAddressRequest(BaseModel):
+    title: str | None = None
+    receiver: str | None = None
+    phone: str | None = None
+    city: str | None = None
+    district: str | None = None
+    neighborhood: str | None = None
+    address: str | None = None
+    zipCode: str | None = None
+    isPrimary: bool | None = None
+    type: str | None = None
+    taxOffice: str | None = None
+    taxNumber: str | None = None
+    companyName: str | None = None
+
+
+# =====================================================================
+# Merchant, Brand, Organization Profile Models
+# =====================================================================
+
+class EntityProfileModel(BaseModel):
+    field_id: str | None = Field(None, alias='_id')
+    name: str
+    slug: str
+    description: str | None = None
+    biography: str | None = None
+    logo: Any | None = None
+    coverImage: Any | None = None
+    featuredImage: Any | None = None
+    gallery: list[Any] = []
+    attributes: dict[str, Any] = {}
+    socialMedia: dict[str, Any] = {}
+    address: dict[str, Any] = {}
+    status: str | None = None
+
+
+class UpdateEntityMeRequest(BaseModel):
+    logo: str | None = None
+    image: str | None = None
+    coverImage: str | None = None
+    featuredImage: str | None = None
+    cover: str | None = None
+    description: str | None = None
+    biography: str | None = None
+    attributes: dict[str, Any] | None = None
+    gallery: list[str] | None = None
+    socialMedia: dict[str, Any] | None = None
+    address: dict[str, Any] | None = None
+
+
+# =====================================================================
+# Static Geographic & Tax Models
+# =====================================================================
+
+class CityModel(BaseModel):
+    id: str
+    name: str
+
+
+class DistrictModel(BaseModel):
+    id: str
+    name: str
+
+
+class NeighborhoodModel(BaseModel):
+    id: str
+    name: str
+
+
+class TaxOfficeModel(BaseModel):
+    id: str
+    name: str
+    cityId: str
+
+
+# =====================================================================
+# Team Member Models
+# =====================================================================
+
+class TeamMemberName(BaseModel):
+    first: str
+    last: str
+
+
+class TeamMemberModel(BaseModel):
+    field_id: str | None = Field(None, alias='_id')
+    slug: str
+    name: TeamMemberName
+    title: str
+    bio: str | None = None
+    biography: str | None = None
+    image: Any | None = None
+    order: int | None = None
+    socialMedia: dict[str, Any] = {}
+    status: str | None = None
+
+
 AttributeModel.model_rebuild()
 CustomFormField.model_rebuild()
