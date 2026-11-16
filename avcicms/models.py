@@ -336,3 +336,627 @@ class MenuCategory(BaseModel):
 
 Menu.model_rebuild()
 MenuItem.model_rebuild()
+
+
+class AttributeEntityType(str, Enum):
+    PRODUCT = 'product'
+    PROJECT = 'project'
+    EVENT = 'event'
+    MERCHANT = 'merchant'
+    BRAND = 'brand'
+    ORGANIZATION = 'organization'
+    PLACE = 'place'
+
+
+class AttributeDataType(str, Enum):
+    STRING = 'STRING'
+    NUMBER = 'NUMBER'
+    BOOLEAN = 'BOOLEAN'
+    DATE = 'DATE'
+    SELECT = 'SELECT'
+    MULTISELECT = 'MULTISELECT'
+    SOURCE = 'SOURCE'
+    OBJECT = 'OBJECT'
+
+
+class AttributeOption(BaseModel):
+    label: str
+    value: str
+    color: str | None = None
+    isDefault: bool | None = False
+
+
+class AttributeValidation(BaseModel):
+    min: float | None = None
+    max: float | None = None
+    regex: str | None = None
+    options: list[AttributeOption] | None = None
+
+
+class AttributeSourceConfig(BaseModel):
+    entityType: str
+    filterQuery: dict[str, Any] | None = None
+
+
+class AttributeModel(BaseModel):
+    field_id: str | None = Field(None, alias='_id')
+    type: AttributeDataType
+    key: str
+    label: str
+    description: str | None = None
+    entityType: AttributeEntityType | str | None = None
+    isRequired: bool | None = False
+    isFilterable: bool | None = False
+    options: list[AttributeOption] | None = None
+    sourceConfig: AttributeSourceConfig | None = None
+    nestedFields: list[AttributeModel] | None = None
+    unit: str | None = None
+    status: str = 'ACTIVE'
+    createdAt: AwareDatetime | None = None
+    updatedAt: AwareDatetime | None = None
+
+
+class AttributeShortModel(BaseModel):
+    field_id: str | None = Field(None, alias='_id')
+    label: str
+    key: str
+    type: AttributeDataType
+
+
+class NormalizedAttributeValue(BaseModel):
+    attributeId: str
+    label: str | None = None
+    key: str | None = None
+    value: Any = None
+    unit: str | None = None
+
+
+class FormPurpose(str, Enum):
+    STANDARD = 'STANDARD'
+    MERCHANT_APPLICATION = 'MERCHANT_APPLICATION'
+    BRAND_APPLICATION = 'BRAND_APPLICATION'
+    ORGANIZATION_APPLICATION = 'ORGANIZATION_APPLICATION'
+    SURVEY = 'SURVEY'
+
+
+class FormSubmissionStatus(str, Enum):
+    PENDING = 'PENDING'
+    UNDER_REVIEW = 'UNDER_REVIEW'
+    APPROVED = 'APPROVED'
+    REJECTED = 'REJECTED'
+    CANCELLED = 'CANCELLED'
+
+
+class FormFieldType(str, Enum):
+    TEXT = 'TEXT'
+    NUMBER = 'NUMBER'
+    TEXTAREA = 'TEXTAREA'
+    SELECT = 'SELECT'
+    RADIO = 'RADIO'
+    CHECKBOX = 'CHECKBOX'
+    DATE = 'DATE'
+    FILE = 'FILE'
+    EMAIL = 'EMAIL'
+    PHONE = 'PHONE'
+    URL = 'URL'
+    SECTION = 'SECTION'
+    OBJECT = 'OBJECT'
+
+
+class FormFieldValidation(BaseModel):
+    min: float | None = None
+    max: float | None = None
+    regex: str | None = None
+    maxSize: int | None = None
+    accept: str | None = None
+
+
+class CustomFormField(BaseModel):
+    id: str
+    name: str
+    label: str
+    type: FormFieldType | str
+    required: bool | None = False
+    placeholder: str | None = None
+    options: list[str] | None = None
+    validation: FormFieldValidation | None = None
+    mappedAttributeId: str | None = None
+    nestedFields: list[CustomFormField] | None = None
+
+
+class CustomFormActions(BaseModel):
+    autoApprove: bool | None = False
+    notifyEmails: list[str] | None = None
+    createEntityOnApproval: bool | None = False
+    onApproval: dict[str, Any] | None = None
+
+
+class CustomFormModel(BaseModel):
+    field_id: str | None = Field(None, alias='_id')
+    title: str
+    slug: str | None = None
+    description: str | None = None
+    purpose: FormPurpose = FormPurpose.STANDARD
+    fields: list[CustomFormField] = []
+    actions: CustomFormActions | None = None
+    isActive: bool = True
+    createdAt: AwareDatetime | None = None
+    updatedAt: AwareDatetime | None = None
+
+
+class FormSubmissionModel(BaseModel):
+    field_id: str | None = Field(None, alias='_id')
+    form: str | CustomFormModel
+    user: str | None = None
+    status: FormSubmissionStatus = FormSubmissionStatus.PENDING
+    answers: dict[str, Any] | list[dict[str, Any]] = {}
+    submittedAt: AwareDatetime | None = None
+    processedAt: AwareDatetime | None = None
+    processedBy: str | None = None
+
+
+class FormStatisticsModel(BaseModel):
+    totalSubmissions: int = 0
+    pendingCount: int = 0
+    approvedCount: int = 0
+    rejectedCount: int = 0
+    conversionRate: float | None = None
+
+
+class SubmissionLogModel(BaseModel):
+    field_id: str | None = Field(None, alias='_id')
+    submissionId: str
+    action: str
+    details: Any | None = None
+    performedBy: str | None = None
+    createdAt: AwareDatetime | None = None
+
+
+# ==========================================
+# Basket Models
+# ==========================================
+
+class BasketItemType(str, Enum):
+    PRODUCT = 'product'
+    EVENT = 'event'
+    ROUTE = 'route'
+
+
+class BasketItemPrice(BaseModel):
+    amount: float
+    currency: str = 'TRY'
+    original: float | None = None
+    discount: float | None = None
+
+
+class BasketItemModel(BaseModel):
+    field_id: str | None = Field(None, alias='_id')
+    id: str | None = None
+    itemType: BasketItemType = BasketItemType.PRODUCT
+    name: str | None = None
+    slug: str | None = None
+    quantity: int = 1
+    price: BasketItemPrice | None = None
+    image: str | None = None
+    variantId: str | None = None
+    variantName: str | None = None
+    merchant: dict[str, Any] | None = None
+    brand: dict[str, Any] | None = None
+    addedToBasketAt: AwareDatetime | None = None
+
+
+class BasketPricingModel(BaseModel):
+    subtotal: float = 0.0
+    discount: float = 0.0
+    shipping: float = 0.0
+    total: float = 0.0
+    currency: str = 'TRY'
+
+
+class BasketModel(BaseModel):
+    field_id: str | None = Field(None, alias='_id')
+    basketId: str | None = None
+    user: str | None = None
+    items: list[BasketItemModel] = []
+    price: BasketPricingModel | None = None
+    coupon: str | None = None
+    shippingAddressId: str | None = None
+    billingAddressId: str | None = None
+    updatedAt: AwareDatetime | None = None
+    createdAt: AwareDatetime | None = None
+
+
+class CreateBasketRequest(BaseModel):
+    currency: str = 'TRY'
+
+
+class AddBasketItemInput(BaseModel):
+    id: str
+    quantity: int = 1
+    itemType: BasketItemType = BasketItemType.PRODUCT
+    variantId: str | None = None
+
+
+class AddBasketItemsRequest(BaseModel):
+    items: list[AddBasketItemInput]
+
+
+class UpdateBasketRequest(BaseModel):
+    coupon: str | None = None
+    shippingAddressId: str | None = None
+    billingAddressId: str | None = None
+
+
+# ==========================================
+# Order Models
+# ==========================================
+
+class OrderStatus(str, Enum):
+    WAITING = 'WAITING'
+    PENDING_PAYMENT = 'PENDING_PAYMENT'
+    PREPARING = 'PREPARING'
+    ON_SHIPMENT = 'ON_SHIPMENT'
+    DONE = 'DONE'
+    REFUNDED = 'REFUNDED'
+    CANCELED = 'CANCELED'
+
+
+class OrderItemPriceModel(BaseModel):
+    sale: float
+    list: float | None = None
+    currency: str = 'TRY'
+
+
+class OrderItemModel(BaseModel):
+    field_id: str | None = Field(None, alias='_id')
+    name: str | None = None
+    image: str | None = None
+    quantity: int = 1
+    unit: str | None = None
+    price: OrderItemPriceModel | None = None
+    type: str | None = None
+    product: str | None = None
+    event: str | None = None
+    route: str | None = None
+    merchant: dict[str, Any] | None = None
+    brand: dict[str, Any] | None = None
+
+
+class OrderAddressModel(BaseModel):
+    title: str | None = None
+    address: str | None = None
+    city: str | None = None
+    state: str | None = None
+    country: str | None = None
+    zipCode: str | None = None
+    phone: str | None = None
+
+
+class OrderAttendeeModel(BaseModel):
+    basketItemId: str | None = None
+    name: dict[str, str] | None = None
+    email: str | None = None
+    phone: str | None = None
+    identityNumber: str | None = None
+    ticketNumber: str | None = None
+    qrHash: str | None = None
+
+
+class OrderPaymentModel(BaseModel):
+    currency: str = 'TRY'
+    paidAmount: float = 0.0
+    paymentStatus: str | None = None
+    paymentMethod: str | None = None
+    installment: int | None = None
+
+
+class OrderShipmentModel(BaseModel):
+    provider: str | None = None
+    trackingNumber: str | None = None
+    barcode: str | None = None
+    fee: dict[str, Any] | None = None
+
+
+class SubOrderModel(BaseModel):
+    field_id: str | None = Field(None, alias='_id')
+    subOrderId: str | None = None
+    status: OrderStatus = OrderStatus.WAITING
+    items: list[OrderItemModel] = []
+    payment: OrderPaymentModel | None = None
+    shipment: OrderShipmentModel | None = None
+    merchant: dict[str, Any] | None = None
+    brand: dict[str, Any] | None = None
+    createdAt: AwareDatetime | None = None
+    updatedAt: AwareDatetime | None = None
+
+
+class OrderModel(BaseModel):
+    field_id: str | None = Field(None, alias='_id')
+    orderId: str | None = None
+    date: AwareDatetime | str | None = None
+    status: OrderStatus = OrderStatus.WAITING
+    items: list[OrderItemModel] = []
+    subOrders: list[SubOrderModel] | None = None
+    addresses: dict[str, OrderAddressModel] | None = None
+    payment: OrderPaymentModel | None = None
+    attendees: list[OrderAttendeeModel] | None = None
+    subscriptionId: str | None = None
+    createdAt: AwareDatetime | None = None
+    updatedAt: AwareDatetime | None = None
+
+
+class OrderParticipantInput(BaseModel):
+    basketItemId: str
+    name: str
+    email: str | None = None
+    phone: str | None = None
+
+
+class CreateOrderRequest(BaseModel):
+    basketId: str
+    paymentMethod: str = 'CREDIT_CARD'
+    addresses: dict[str, str]
+    card: dict[str, Any] | None = None
+    cardId: str | None = None
+    installment: int | None = None
+    participants: list[OrderParticipantInput] | None = None
+
+
+class InstallmentQueryRequest(BaseModel):
+    binNumber: str
+    price: float
+
+
+class InstallmentPriceOption(BaseModel):
+    installmentNumber: int
+    totalPrice: float
+    installmentPrice: float
+
+
+class InstallmentOptionModel(BaseModel):
+    bankName: str
+    cardType: str
+    installmentPrices: list[InstallmentPriceOption] = []
+
+
+class SavedCardModel(BaseModel):
+    field_id: str | None = Field(None, alias='_id')
+    cardUserKey: str | None = None
+    cardToken: str | None = None
+    cardAlias: str | None = None
+    binNumber: str | None = None
+    cardType: str | None = None
+    cardAssociation: str | None = None
+    cardFamily: str | None = None
+    cardBankName: str | None = None
+
+
+class SaveCardRequest(BaseModel):
+    cardAlias: str
+    cardHolderName: str
+    cardNumber: str
+    expireMonth: str
+    expireYear: str
+
+
+# =====================================================================
+# User & Address Models
+# =====================================================================
+
+class UserAddressModel(BaseModel):
+    addressId: str | None = None
+    field_id: str | None = Field(None, alias='_id')
+    id: str | None = None
+    title: str
+    receiver: str
+    phone: str
+    city: str
+    district: str
+    neighborhood: str | None = None
+    address: str
+    zipCode: str | None = None
+    isPrimary: bool = False
+    type: str = 'individual'
+    taxOffice: str | None = None
+    taxNumber: str | None = None
+    companyName: str | None = None
+
+
+class CreateAddressRequest(BaseModel):
+    title: str
+    receiver: str
+    phone: str
+    city: str
+    district: str
+    neighborhood: str | None = None
+    address: str
+    zipCode: str | None = None
+    isPrimary: bool | None = None
+    type: str = 'individual'
+    taxOffice: str | None = None
+    taxNumber: str | None = None
+    companyName: str | None = None
+
+
+class UpdateAddressRequest(BaseModel):
+    title: str | None = None
+    receiver: str | None = None
+    phone: str | None = None
+    city: str | None = None
+    district: str | None = None
+    neighborhood: str | None = None
+    address: str | None = None
+    zipCode: str | None = None
+    isPrimary: bool | None = None
+    type: str | None = None
+    taxOffice: str | None = None
+    taxNumber: str | None = None
+    companyName: str | None = None
+
+
+# =====================================================================
+# Merchant, Brand, Organization Profile Models
+# =====================================================================
+
+class EntityProfileModel(BaseModel):
+    field_id: str | None = Field(None, alias='_id')
+    name: str
+    slug: str
+    description: str | None = None
+    biography: str | None = None
+    logo: Any | None = None
+    coverImage: Any | None = None
+    featuredImage: Any | None = None
+    gallery: list[Any] = []
+    attributes: dict[str, Any] = {}
+    socialMedia: dict[str, Any] = {}
+    address: dict[str, Any] = {}
+    status: str | None = None
+
+
+class UpdateEntityMeRequest(BaseModel):
+    logo: str | None = None
+    image: str | None = None
+    coverImage: str | None = None
+    featuredImage: str | None = None
+    cover: str | None = None
+    description: str | None = None
+    biography: str | None = None
+    attributes: dict[str, Any] | None = None
+    gallery: list[str] | None = None
+    socialMedia: dict[str, Any] | None = None
+    address: dict[str, Any] | None = None
+
+
+# =====================================================================
+# Static Geographic & Tax Models
+# =====================================================================
+
+class CityModel(BaseModel):
+    id: str
+    name: str
+
+
+class DistrictModel(BaseModel):
+    id: str
+    name: str
+
+
+class NeighborhoodModel(BaseModel):
+    id: str
+    name: str
+
+
+class TaxOfficeModel(BaseModel):
+    id: str
+    name: str
+    cityId: str
+
+
+# =====================================================================
+# Team Member Models
+# =====================================================================
+
+class TeamMemberName(BaseModel):
+    first: str
+    last: str
+
+
+class TeamMemberModel(BaseModel):
+    field_id: str | None = Field(None, alias='_id')
+    slug: str
+    name: TeamMemberName
+    title: str
+    bio: str | None = None
+    biography: str | None = None
+    image: Any | None = None
+    order: int | None = None
+    socialMedia: dict[str, Any] = {}
+    status: str | None = None
+
+
+# =====================================================================
+# Place (Venue & Physical Location) Models
+# =====================================================================
+
+class PlaceLocationModel(BaseModel):
+    type: str | None = 'Point'
+    coordinates: list[float] | None = None
+
+
+class PlaceAddressModel(BaseModel):
+    title: str | None = None
+    country: str | None = None
+    city: str | None = None
+    district: str | None = None
+    neighborhood: str | None = None
+    street: str | None = None
+    buildingNumber: str | None = None
+    doorNumber: str | None = None
+    postalCode: str | None = None
+    formattedAddress: str | None = None
+    location: PlaceLocationModel | None = None
+    latitude: float | None = None
+    longitude: float | None = None
+
+
+class PlaceCapacityModel(BaseModel):
+    min: int | None = None
+    max: int | None = None
+
+
+class PlaceDailyHours(BaseModel):
+    start: str
+    end: str
+
+
+class PlaceWorkingHoursModel(BaseModel):
+    day: int
+    hours: PlaceDailyHours
+
+
+class PlacePricingModel(BaseModel):
+    isPaid: bool = False
+    pricingType: str | None = None
+    amount: float | None = None
+    currency: str | None = None
+
+
+class PlaceModel(BaseModel):
+    field_id: str | None = Field(None, alias='_id')
+    name: str
+    slug: str
+    abstract: str | None = None
+    description: str | None = None
+    logo: Any | None = None
+    coverImage: Any | None = None
+    featuredImage: Any | None = None
+    gallery: list[Any] = []
+    capacity: PlaceCapacityModel | None = None
+    working: list[PlaceWorkingHoursModel] = []
+    pricing: PlacePricingModel | None = None
+    address: PlaceAddressModel | None = None
+    area: list[Any] = []
+    color: str | None = None
+    status: str | None = None
+    attributes: list[dict[str, Any]] = []
+    createdAt: str | None = None
+    updatedAt: str | None = None
+
+
+class PlaceShortModel(BaseModel):
+    field_id: str | None = Field(None, alias='_id')
+    name: str
+    slug: str
+    abstract: str | None = None
+    logo: Any | None = None
+    featuredImage: Any | None = None
+    capacity: PlaceCapacityModel | None = None
+    address: PlaceAddressModel | None = None
+    pricing: PlacePricingModel | None = None
+    color: str | None = None
+
+
+
+AttributeModel.model_rebuild()
+CustomFormField.model_rebuild()
